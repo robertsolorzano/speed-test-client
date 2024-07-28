@@ -58,7 +58,7 @@ void MainWindow::calculateDownloadSpeed()
 {
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->downloadSpeedLabel->setText(QString("Download Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 }
@@ -70,7 +70,7 @@ void MainWindow::finalizeDownloadSpeed()
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->downloadSpeedLabel->setText(QString("Final Download Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 
@@ -113,7 +113,7 @@ void MainWindow::calculateUploadSpeed()
 {
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 }
@@ -125,7 +125,7 @@ void MainWindow::finalizeUploadSpeed()
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->uploadSpeedLabel->setText(QString("Final Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 
