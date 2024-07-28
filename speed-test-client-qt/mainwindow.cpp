@@ -117,7 +117,7 @@ void MainWindow::updateUploadProgress()
     QJsonObject jsonObj = jsonDoc.object();
 
     uploadSize = jsonObj["size"].toInt();
-    double mbps = jsonObj["mbps"].toDouble();
+    double mbps = jsonObj["mbps"].toString().toDouble(); // Ensure mbps is correctly converted to double
 
     ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
     qDebug() << "Upload size updated to" << uploadSize << ", Mbps: " << mbps;
@@ -167,9 +167,13 @@ void MainWindow::handleNetworkData(QNetworkReply *networkReply)
         qint64 serverTimestamp = jsonObj["serverTimestamp"].toVariant().toLongLong();
         qint64 serverProcessingTime = jsonObj["serverProcessingTime"].toVariant().toLongLong();
 
-        QString result = QString("Message: %1\nServer Timestamp: %2\nServer Processing Time: %3 ms")
-                             .arg(message)
-                             .arg(serverTimestamp)
+        // Convert the server timestamp to a readable format
+        QDateTime dateTime;
+        dateTime.setMSecsSinceEpoch(serverTimestamp);
+        QString formattedTime = dateTime.toString("hh:mm:ss AP");
+
+        QString result = QString("Message: %1\nServer Time: %2\nServer Processing Time: %3 ms")
+                             .arg(message, formattedTime)
                              .arg(serverProcessingTime);
 
         ui->resultLabel->setText(result);
@@ -179,3 +183,4 @@ void MainWindow::handleNetworkData(QNetworkReply *networkReply)
 
     networkReply->deleteLater();
 }
+
