@@ -5,6 +5,7 @@
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
 #include <QTimer>
+#include <QDateTime>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,30 +19,31 @@ public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
+signals:
+    void downloadCompleted();
+    void uploadCompleted();
+
 private slots:
-    void downloadButtonClicked();
-    void uploadButtonClicked();
-    void latencyButtonClicked();
+    void testMySpeed();
+    void startDownload();
+    void updateDownloadProgress();
+    void calculateDownloadSpeed();
+    void finalizeDownloadSpeed();
+    void startUpload();
+    void updateUploadProgress();
+    void calculateUploadSpeed();
+    void finalizeUploadSpeed();
+    void startLatency();
     void handleNetworkData(QNetworkReply *networkReply);
 
 private:
     Ui::MainWindow *ui;
     QNetworkAccessManager *networkManager;
     QNetworkReply *networkReply;
+    QTimer *timer;
+    QDateTime startTime;
     qint64 downloadSize;
     qint64 uploadSize;
-    QDateTime startTime;
-    QTimer *timer;
-
-    void startDownload();
-    void updateDownloadProgress();
-    void calculateDownloadSpeed();
-    void finalizeDownloadSpeed();
-
-    void startUpload();
-    void updateUploadProgress();
-    void calculateUploadSpeed();
-    void finalizeUploadSpeed();
 };
 
 #endif // MAINWINDOW_H

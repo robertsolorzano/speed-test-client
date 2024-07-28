@@ -4,6 +4,7 @@
 #include <QJsonDocument>
 #include <QJsonObject>
 #include <QTimer>
+#include <QDebug>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -15,9 +16,7 @@ MainWindow::MainWindow(QWidget *parent)
 {
     ui->setupUi(this);
 
-    connect(ui->downloadButton, &QPushButton::clicked, this, &MainWindow::downloadButtonClicked);
-    connect(ui->uploadButton, &QPushButton::clicked, this, &MainWindow::uploadButtonClicked);
-    connect(ui->latencyButton, &QPushButton::clicked, this, &MainWindow::latencyButtonClicked);
+    connect(ui->testMySpeedButton, &QPushButton::clicked, this, &MainWindow::testMySpeed);
     connect(networkManager, &QNetworkAccessManager::finished, this, &MainWindow::handleNetworkData);
 }
 
@@ -26,24 +25,17 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-void MainWindow::downloadButtonClicked()
+void MainWindow::testMySpeed()
 {
+    qDebug() << "Test My Speed button clicked";
+
     startDownload();
-}
-
-void MainWindow::uploadButtonClicked()
-{
-    startUpload();
-}
-
-void MainWindow::latencyButtonClicked()
-{
-    QNetworkRequest request(QUrl("http://localhost:3000/latency"));
-    networkManager->get(request);
 }
 
 void MainWindow::startDownload()
 {
+    qDebug() << "Starting download";
+
     downloadSize = 0;
     QNetworkRequest request(QUrl("http://localhost:3000/download"));
     networkReply = networkManager->get(request);
@@ -73,16 +65,22 @@ void MainWindow::calculateDownloadSpeed()
 
 void MainWindow::finalizeDownloadSpeed()
 {
+    qDebug() << "Finalizing download speed";
+
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
     double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
 
     ui->downloadSpeedLabel->setText(QString("Final Download Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
+
+    startUpload();
 }
 
 void MainWindow::startUpload()
 {
+    qDebug() << "Starting upload";
+
     uploadSize = 0;
     QByteArray data;
     data.resize(1024 * 1024); // 1MB chunk
@@ -122,12 +120,24 @@ void MainWindow::calculateUploadSpeed()
 
 void MainWindow::finalizeUploadSpeed()
 {
+    qDebug() << "Finalizing upload speed";
+
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
     double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
 
     ui->uploadSpeedLabel->setText(QString("Final Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
+
+    startLatency();
+}
+
+void MainWindow::startLatency()
+{
+    qDebug() << "Starting latency test";
+
+    QNetworkRequest request(QUrl("http://localhost:3000/latency"));
+    networkManager->get(request);
 }
 
 void MainWindow::handleNetworkData(QNetworkReply *networkReply)
