@@ -4,8 +4,8 @@
 #include <QMainWindow>
 #include <QNetworkAccessManager>
 #include <QNetworkReply>
-#include <QTimer>
 #include <QDateTime>
+#include <QTimer>
 
 QT_BEGIN_NAMESPACE
 namespace Ui { class MainWindow; }
@@ -18,10 +18,6 @@ class MainWindow : public QMainWindow
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-signals:
-    void downloadCompleted();
-    void uploadCompleted();
 
 private slots:
     void testMySpeed();
@@ -40,12 +36,14 @@ private:
     Ui::MainWindow *ui;
     QNetworkAccessManager *networkManager;
     QNetworkReply *networkReply;
-    QTimer *timer;
-    QDateTime startTime;
     qint64 downloadSize;
     qint64 uploadSize;
     qint64 totalUploadedSize;
-    const qint64 maxUploadSize;
+    qint64 maxUploadSize;
+    QDateTime startTime;
+    QTimer *timer;
+
+    void loadEnvFile(const QString &filePath);
 };
 
 #endif // MAINWINDOW_H

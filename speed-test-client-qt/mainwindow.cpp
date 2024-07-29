@@ -7,6 +7,7 @@
 #include <QDateTime>
 #include <QTimer>
 #include <QNetworkReply>
+#include <cstdlib> // For std::getenv
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -16,7 +17,7 @@ MainWindow::MainWindow(QWidget *parent)
     , downloadSize(0)
     , uploadSize(0)
     , totalUploadedSize(0)
-    , maxUploadSize(10240 * 1024 * 100) // 100MB
+    , maxUploadSize(1024 * 1024 * 100) // 100MB
 {
     ui->setupUi(this);
 
@@ -41,7 +42,13 @@ void MainWindow::startDownload()
     qDebug() << "Starting download";
 
     downloadSize = 0;
-    QNetworkRequest request(QUrl("http://localhost:3000/download"));
+    const char* downloadUrl = std::getenv("DOWNLOAD_URL");
+    if (!downloadUrl) {
+        qDebug() << "DOWNLOAD_URL not set";
+        return;
+    }
+
+    QNetworkRequest request((QUrl(downloadUrl)));
     networkReply = networkManager->get(request);
     connect(networkReply, &QNetworkReply::readyRead, this, &MainWindow::updateDownloadProgress);
     connect(networkReply, &QNetworkReply::finished, this, &MainWindow::finalizeDownloadSpeed);
@@ -79,7 +86,7 @@ void MainWindow::finalizeDownloadSpeed()
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (downloadSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->downloadSpeedLabel->setText(QString("Final Download Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 
@@ -94,11 +101,17 @@ void MainWindow::startUpload()
     uploadSize = 0;
     totalUploadedSize = 0;
 
+    const char* uploadUrl = std::getenv("UPLOAD_URL");
+    if (!uploadUrl) {
+        qDebug() << "UPLOAD_URL not set";
+        return;
+    }
+
     QByteArray data;
     data.resize(maxUploadSize); // 100MB
     data.fill('a');
 
-    QNetworkRequest request(QUrl("http://localhost:3000/upload"));
+    QNetworkRequest request((QUrl(uploadUrl)));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
 
     startTime = QDateTime::currentDateTime();
@@ -127,7 +140,7 @@ void MainWindow::updateUploadProgress()
 
         if (jsonObj.contains("size") && jsonObj.contains("mbps")) {
             uploadSize = jsonObj["size"].toInt();
-            double mbps = jsonObj["mbps"].toString().toDouble(); // Ensure mbps is correctly converted to double
+            double mbps = jsonObj["mbps"].toString().toDouble();
 
             ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
             qDebug() << "Upload size updated to" << uploadSize << ", Mbps: " << mbps;
@@ -140,7 +153,7 @@ void MainWindow::calculateUploadSpeed()
 {
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (totalUploadedSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (totalUploadedSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 }
@@ -152,7 +165,7 @@ void MainWindow::finalizeUploadSpeed()
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (totalUploadedSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (totalUploadedSize * 8) / elapsedTimeInSeconds / (1024 * 1024);
 
     ui->uploadSpeedLabel->setText(QString("Final Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 
@@ -164,7 +177,13 @@ void MainWindow::startLatency()
 {
     qDebug() << "Starting latency test";
 
-    QNetworkRequest request(QUrl("http://localhost:3000/latency"));
+    const char* latencyUrl = std::getenv("LATENCY_URL");
+    if (!latencyUrl) {
+        qDebug() << "LATENCY_URL not set";
+        return;
+    }
+
+    QNetworkRequest request((QUrl(latencyUrl)));
     networkManager->get(request);
 }
 
@@ -185,7 +204,6 @@ void MainWindow::handleNetworkData(QNetworkReply *networkReply)
         dateTime.setMSecsSinceEpoch(serverTimestamp);
         QString formattedTime = dateTime.toString("hh:mm:ss AP");
 
-        // Use multi-arg call to format the string
         QString result = QString("Message: %1\nServer Time: %2\nServer Processing Time: %3 ms")
                              .arg(message, formattedTime, QString::number(serverProcessingTime));
 
