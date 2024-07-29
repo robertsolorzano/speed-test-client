@@ -15,6 +15,8 @@ MainWindow::MainWindow(QWidget *parent)
     , networkReply(nullptr)
     , downloadSize(0)
     , uploadSize(0)
+    , totalUploadedSize(0)
+    , maxUploadSize(10240 * 1024 * 100) // 100MB
 {
     ui->setupUi(this);
 
@@ -90,21 +92,23 @@ void MainWindow::startUpload()
     qDebug() << "Starting upload";
 
     uploadSize = 0;
+    totalUploadedSize = 0;
+
     QByteArray data;
-    data.resize(0.01 * 1024 * 1024); // 1MB chunk
+    data.resize(maxUploadSize); // 100MB
     data.fill('a');
 
     QNetworkRequest request(QUrl("http://localhost:3000/upload"));
     request.setHeader(QNetworkRequest::ContentTypeHeader, "application/octet-stream");
 
-    networkReply = networkManager->post(request, data);
-    connect(networkReply, &QNetworkReply::readyRead, this, &MainWindow::updateUploadProgress);
-    connect(networkReply, &QNetworkReply::finished, this, &MainWindow::finalizeUploadSpeed);
-
     startTime = QDateTime::currentDateTime();
     timer = new QTimer(this);
     connect(timer, &QTimer::timeout, this, &MainWindow::calculateUploadSpeed);
     timer->start(1000); // Update speed every second
+
+    networkReply = networkManager->post(request, data);
+    connect(networkReply, &QNetworkReply::readyRead, this, &MainWindow::updateUploadProgress);
+    connect(networkReply, &QNetworkReply::finished, this, &MainWindow::finalizeUploadSpeed);
 
     qDebug() << "Upload request sent, timer started";
 }
@@ -129,13 +133,14 @@ void MainWindow::updateUploadProgress()
             qDebug() << "Upload size updated to" << uploadSize << ", Mbps: " << mbps;
         }
     }
+    totalUploadedSize += uploadSize;
 }
 
 void MainWindow::calculateUploadSpeed()
 {
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (totalUploadedSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
 
     ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 }
@@ -147,7 +152,7 @@ void MainWindow::finalizeUploadSpeed()
     timer->stop();
     qint64 elapsedTime = startTime.msecsTo(QDateTime::currentDateTime());
     double elapsedTimeInSeconds = elapsedTime / 1000.0;
-    double mbps = (uploadSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
+    double mbps = (totalUploadedSize * 8) / elapsedTimeInSeconds / (1024 * 1024); // Convert bytes to Mbps
 
     ui->uploadSpeedLabel->setText(QString("Final Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
 

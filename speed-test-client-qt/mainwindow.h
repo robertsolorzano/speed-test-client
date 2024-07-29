@@ -44,6 +44,8 @@ private:
     QDateTime startTime;
     qint64 downloadSize;
     qint64 uploadSize;
+    qint64 totalUploadedSize;
+    const qint64 maxUploadSize;
 };
 
 #endif // MAINWINDOW_H
