@@ -6,64 +6,77 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>800</width>
-    <height>600</height>
+    <width>751</width>
+    <height>569</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow {
+    background-color: #24657A; 
+}
+</string>
+  </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QLabel" name="downloadSpeedLabel">
     <property name="geometry">
      <rect>
-      <x>250</x>
-      <y>50</y>
+      <x>230</x>
+      <y>60</y>
       <width>301</width>
-      <height>61</height>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Download Speed</string>
     </property>
    </widget>
    <widget class="QLabel" name="uploadSpeedLabel">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>230</x>
       <y>130</y>
-      <width>281</width>
+      <width>301</width>
       <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Upload Speed</string>
     </property>
    </widget>
    <widget class="QLabel" name="resultLabel">
     <property name="geometry">
      <rect>
-      <x>240</x>
+      <x>230</x>
       <y>190</y>
-      <width>321</width>
+      <width>301</width>
       <height>51</height>
      </rect>
     </property>
     <property name="text">
-     <string>TextLabel</string>
+     <string>Latency</string>
     </property>
    </widget>
    <widget class="QPushButton" name="testMySpeedButton">
     <property name="geometry">
      <rect>
-      <x>210</x>
-      <y>380</y>
+      <x>290</x>
+      <y>320</y>
       <width>161</width>
       <height>61</height>
      </rect>
     </property>
+    <property name="styleSheet">
+     <string notr="true">QPushButton {
+background-color: #7a243a;
+border-radius: 12px;
+}
+</string>
+    </property>
     <property name="text">
-     <string>PushButton</string>
+     <string>Test My Speed</string>
     </property>
    </widget>
   </widget>
@@ -72,7 +85,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>800</width>
+     <width>751</width>
      <height>23</height>
     </rect>
    </property>

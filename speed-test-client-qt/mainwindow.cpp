@@ -1,10 +1,10 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QNetworkRequest>
+#include <QApplication>
 #include <QJsonDocument>
 #include <QJsonObject>
-#include <QTimer>
 #include <QDebug>
+#include <QDateTime>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -113,14 +113,20 @@ void MainWindow::updateUploadProgress()
 
     QByteArray responseData = networkReply->readAll();
     qDebug() << "Response Data: " << responseData;
-    QJsonDocument jsonDoc = QJsonDocument::fromJson(responseData);
-    QJsonObject jsonObj = jsonDoc.object();
+    QStringList responseLines = QString(responseData).split('\n', Qt::SkipEmptyParts);
 
-    uploadSize = jsonObj["size"].toInt();
-    double mbps = jsonObj["mbps"].toString().toDouble(); // Ensure mbps is correctly converted to double
+    foreach (const QString &line, responseLines) {
+        QJsonDocument jsonDoc = QJsonDocument::fromJson(line.toUtf8());
+        QJsonObject jsonObj = jsonDoc.object();
 
-    ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
-    qDebug() << "Upload size updated to" << uploadSize << ", Mbps: " << mbps;
+        if (jsonObj.contains("size") && jsonObj.contains("mbps")) {
+            uploadSize = jsonObj["size"].toInt();
+            double mbps = jsonObj["mbps"].toString().toDouble(); // Ensure mbps is correctly converted to double
+
+            ui->uploadSpeedLabel->setText(QString("Upload Speed: %1 Mbps").arg(mbps, 0, 'f', 2));
+            qDebug() << "Upload size updated to" << uploadSize << ", Mbps: " << mbps;
+        }
+    }
 }
 
 void MainWindow::calculateUploadSpeed()
@@ -172,9 +178,9 @@ void MainWindow::handleNetworkData(QNetworkReply *networkReply)
         dateTime.setMSecsSinceEpoch(serverTimestamp);
         QString formattedTime = dateTime.toString("hh:mm:ss AP");
 
+        // Use multi-arg call to format the string
         QString result = QString("Message: %1\nServer Time: %2\nServer Processing Time: %3 ms")
-                             .arg(message, formattedTime)
-                             .arg(serverProcessingTime);
+                             .arg(message, formattedTime, QString::number(serverProcessingTime));
 
         ui->resultLabel->setText(result);
     } else {
@@ -183,4 +189,3 @@ void MainWindow::handleNetworkData(QNetworkReply *networkReply)
 
     networkReply->deleteLater();
 }
-
