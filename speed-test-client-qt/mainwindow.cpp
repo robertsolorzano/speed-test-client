@@ -5,6 +5,8 @@
 #include <QJsonObject>
 #include <QDebug>
 #include <QDateTime>
+#include <QTimer>
+#include <QNetworkReply>
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent)
@@ -89,7 +91,7 @@ void MainWindow::startUpload()
 
     uploadSize = 0;
     QByteArray data;
-    data.resize(1024 * 1024); // 1MB chunk
+    data.resize(0.01 * 1024 * 1024); // 1MB chunk
     data.fill('a');
 
     QNetworkRequest request(QUrl("http://localhost:3000/upload"));
